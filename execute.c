@@ -1,26 +1,36 @@
 #include "main.h"
 
 /**
- * hsh_execute - function
- * @args: array of strings
- *
- * Return: integer
+ * execute_command - function that executes a command
+ * @command: command to execute
+ * 
+ * Return: Nothing
  */
-int hsh_execute(char **args)
+
+void execute_command(char *command)
 {
-	int i;
-	char *builtin_str[] = {"cd", "help", "exit"};
-	int (*builtin_func[])(char **) = {&hsh_cd, &hsh_help, &hsh_exit};
+	pid_t pid = fork();
+	int status;
+	char *args[2];
+	char *env[] = {NULL};
 
-	if (args[0] == NULL)
+	args[0] = "command";
+	args[1] = NULL;
+	if (pid == -1)
 	{
-		return (1);
+		perror("fork");
+		exit(EXIT_FAILURE);
 	}
-	for (i = 0; i < hsh_num_builtins(); i++)
+	else if (pid == 0)
 	{
-		if (strcmp(args[0], builtin_str[i]) == 0)
-			return (*builtin_func[i])(args);
+		execve(command, args, env);
+		perror(command);
+		exit(EXIT_FAILURE);
 	}
-	return (hsh_launch(args));
-}
-
+	else
+	{
+		waitpid(pid, &status, 0);
+		if (WIFEXITED(status) && WEXITSTATUS(status) != 0)
+			fprintf(stderr, "./shell: %s: No such file or directory\n", command);
+	}
+}	

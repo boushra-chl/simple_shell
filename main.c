@@ -2,13 +2,28 @@
 
 /**
  * main - main function
- * @argc: number of arguments
- * @argv: array of arguments
  *
  * Return: 0 on success
  */
-int main(int __attribute__((__unused__)) argc, char __attribute__((__unused__)) **argv)
+int main()
 {
-	hsh_loop();
-	return (EXIT_SUCCESS);
+	char command[MAX_COMMAND_LENGTH];
+	size_t len = strlen(command);
+
+	while (1)
+	{
+		print_prompt();
+
+		if (fgets(command, MAX_COMMAND_LENGTH, stdin) == NULL)
+		{
+			printf("\n");
+			break;
+		}
+		if (len > 0 && command[len - 1] == '\n')
+			command[len - 1] = '\0';
+		if (strcmp(command, "exit") == 0)
+			break;
+		execute_command(command);
+	}
+	return (0);
 }
